@@ -1,0 +1,50 @@
+# This Jinja2 template is used to generate the /etc/postfix/main.cf file.
+# It uses variables to make the role reusable.
+#
+# See: https://www.postfix.org/postconf.5.html
+#
+# Ansible managed: {{ ansible_managed }}
+#
+# Basic configuration
+smtpd_banner = $myhostname ESMTP
+biff = no
+append_dot_mydomain = no
+readme_directory = no
+compatibility_level = 3.6
+inet_protocols = {{ postfix_inet_protocols }}
+inet_interfaces = {{ postfix_inet_interfaces }}
+recipient_delimiter = +
+
+# TLS parameters for incoming connections
+# For a production server, replace snakeoil with real certificates.
+smtpd_tls_cert_file=/etc/ssl/certs/ssl-cert-snakeoil.pem
+smtpd_tls_key_file=/etc/ssl/private/ssl-cert-snakeoil.key
+smtpd_tls_security_level=may
+smtpd_use_tls=yes
+
+# Host and domain configuration
+myhostname = {{ postfix_myhostname }}
+myorigin = /etc/mailname
+mydestination = {{ postfix_mydestination }}
+mynetworks = {{ postfix_mynetworks }}
+
+# Relayhost (smarthost) configuration
+# All outgoing mail will be sent through this host. This is the only
+# supported outbound method in this configuration.
+relayhost = {{ postfix_relayhost }}
+
+# SASL configuration for the relayhost (if credentials are provided)
+{% if postfix_relayhost_user is defined and postfix_relayhost_password is defined %}
+smtp_sasl_auth_enable = yes
+smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd
+smtp_sasl_security_options = noanonymous
+# Use 'encrypt' for services like Gmail/O365 that require TLS
+smtp_tls_security_level = encrypt
+{% else %}
+# If no auth, 'may' is a safe default for opportunistic TLS
+smtp_tls_security_level = may
+{% endif %}
+
+# Other settings
+alias_maps = hash:/etc/aliases
+alias_database = hash:/etc/aliases

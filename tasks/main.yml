@@ -1,0 +1,55 @@
+---
+- name: "POSTFIX | Install postfix package"
+  ansible.builtin.apt:
+    name:
+      - postfix
+      - postfix-pcre # Often useful for advanced matching
+      - libsasl2-modules # Required for SASL authentication
+    state: present
+    update_cache: true
+  tags:
+    - postfix_install
+
+- name: "POSTFIX | Configure /etc/mailname"
+  ansible.builtin.copy:
+    content: "{{ postfix_mail_domain }}\n"
+    dest: /etc/mailname
+    owner: root
+    group: root
+    mode: '0644'
+  tags:
+    - postfix_config    
+
+- name: "POSTFIX | Configure main.cf"
+  ansible.builtin.template:
+    src: main.cf.j2
+    dest: /etc/postfix/main.cf
+    owner: root
+    group: root
+    mode: '0644'
+    validate: 'postfix check -c %s' # Validates the template before deploying
+  notify: Restart Postfix # Triggers the handler to restart the service
+  tags:
+    - postfix_config
+
+- name: "POSTFIX | Configure smarthost credentials (if defined)"
+  when: postfix_relayhost_user is defined and postfix_relayhost_password is defined
+  block:
+    - name: "POSTFIX | Template the SASL password file"
+      ansible.builtin.template:
+        src: sasl_passwd.j2
+        dest: /etc/postfix/sasl_passwd
+        owner: root
+        group: root
+        mode: '0600' # Secure permissions for file with credentials
+      no_log: true # Prevents credentials from being displayed in Ansible logs
+      notify: Restart Postfix
+
+    - name: "POSTFIX | Create hash map for SASL password file"
+      ansible.builtin.command:
+        cmd: postmap hash:/etc/postfix/sasl_passwd
+      changed_when: true # The postmap command always updates the .db file
+      notify: Restart Postfix
+  tags:
+    - postfix_config
+    - postfix_smarthost

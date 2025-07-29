@@ -1,0 +1,21 @@
+galaxy_info:
+  role_name: "mailserver"
+  author: "Luciano Giacchetta"
+  description: "Complete Mail Server Role"
+  company: "Giacchetta Networks LLC"
+  issue_tracker_url: "https://gianet.us/engineering/ansible_role_mailserver/issues"
+  license: "GPL-3.0-only"
+  min_ansible_version: "2.12"
+  platforms:
+  - name: "Debian"
+    versions:
+    - "all"
+  - name: "Ubuntu"
+    versions:
+    - "all"
+  galaxy_tags:
+    - "mta"
+    - "mail"
+    - "postfix"
+
+dependencies: []
