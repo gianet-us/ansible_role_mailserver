@@ -19,13 +19,14 @@ recipient_delimiter = +
 # For a production server, replace snakeoil with real certificates.
 smtpd_tls_cert_file=/etc/ssl/certs/ssl-cert-snakeoil.pem
 smtpd_tls_key_file=/etc/ssl/private/ssl-cert-snakeoil.key
+smtpd_tls_security_level=may
 smtpd_use_tls=yes
 
 # Host and domain configuration
 myhostname = {{ postfix_myhostname }}
 myorigin = /etc/mailname
 mydestination = {{ postfix_mydestination }}
-mynetworks = 127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128
+mynetworks = {{ postfix_mynetworks }}
 
 # Relayhost (smarthost) configuration
 # All outgoing mail will be sent through this host. This is the only

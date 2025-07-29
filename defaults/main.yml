@@ -22,6 +22,9 @@ postfix_myhostname: "mail.{{ postfix_mail_domain }}"
 # It's critical that this includes the server's own hostname and mail domain.
 postfix_mydestination: "$myhostname, localhost.{{ postfix_mail_domain }}, localhost, {{ postfix_mail_domain }}"
 
+# The list of "trusted" remote SMTP clients that have more privileges than "strangers".
+postfix_mynetworks: "127.0.0.0/8 [::1]/128"
+
 # The relayhost (smarthost) for all outgoing mail.
 # This variable MUST be set for the role to work as intended.
 # Example: "[smtp.sendgrid.net]:587"

@@ -27,18 +27,19 @@ The role's behavior can be customized using the following variables. The default
 
 | Variable | Default Value | Description |
 | :---- | :---- | :---- |
-| postfix\_relayhost | "" (empty string) | **Required.** The smarthost for relaying all mail. Use square brackets \[\] to prevent MX lookups (e.g., \[smtp.sendgrid.net\]:587). |
-| postfix\_relayhost\_user | (undefined) | The username for SASL authentication with the smarthost. If defined with a password, SASL auth will be enabled. |
-| postfix\_relayhost\_password | (undefined) | The password or API key for the smarthost user. **It** is strongly recommended to store this in Ansible **Vault.** |
-| postfix\_mail\_domain | \`{{ ansible\_domain | default('internal.local') }}\` |
-| postfix\_myhostname | mail.{{ postfix\_mail\_domain }} | The fully qualified domain name (FQDN) of the mail server itself (e.g., mail.example.com). |
-| postfix\_mydestination | $myhostname, localhost... | A comma-separated list of domains this server will accept mail for. The default is usually sufficient for an internal relay. |
-| postfix\_inet\_interfaces | all | The network interfaces Postfix listens on. Set to loopback-only to only accept mail from the server itself. |
-| postfix\_inet\_protocols | all | The IP protocols to use (ipv4, ipv6, or all). |
+| postfix_relayhost | "" (empty string) | **Required.** The smarthost for relaying all mail. Use square brackets [] to prevent MX lookups (e.g., \[smtp.sendgrid.net\]:587). |
+| postfix_relayhost_user | (undefined) | The username for SASL authentication with the smarthost. If defined with a password, SASL auth will be enabled. |
+| postfix_relayhost_password | (undefined) | The password or API key for the smarthost user. **It** is strongly recommended to store this in Ansible **Vault.** |
+| postfix_mail_domain | `{{ ansible_domain \| default('internal.local') }}` | The primary mail domain for this server |
+| postfix_myhostname | `mail.{{ postfix_mail_domain }}` | The fully qualified domain name (FQDN) of the mail server itself (e.g., mail.example.com). |
+| postfix_mydestination | `$myhostname, localhost.{{ postfix_mail_domain }}, localhost, {{ postfix_mail_domain }}` | A comma-separated list of domains this server will accept mail for. The default is usually sufficient for an internal relay. |
+| postfix_mynetworks | `"127.0.0.0/8 [::1]/128"` | The list of "trusted" remote SMTP clients that have more privileges than "strangers"|
+| postfix_inet_interfaces | all | The network interfaces Postfix listens on. Set to loopback-only to only accept mail from the server itself. |
+| postfix_inet_protocols | all | The IP protocols to use (ipv4, ipv6, or all). |
 
 ### **SASL Authentication**
 
-SASL authentication for the smarthost is **automatically enabled** if both postfix\_relayhost\_user and postfix\_relayhost\_password are defined. If they are not defined, Postfix will attempt to send mail without authentication.
+SASL authentication for the smarthost is **automatically enabled** if both postfix_relayhost_user and postfix_relayhost_password are defined. If they are not defined, Postfix will attempt to send mail without authentication.
 
 ## **Dependencies**
 
