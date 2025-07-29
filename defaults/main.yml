@@ -1,0 +1,34 @@
+#
+# Default variables for the role. These can be overridden in your inventory
+# or playbook to customize the deployment.
+#
+
+# The Internet protocols Postfix will attempt to use when making or accepting connections. Specify one or more of "ipv4" or "ipv6", separated by whitespace or commas.
+# The form "all" is equivalent to "ipv4, ipv6" or "ipv4", depending on whether the operating system implements IPv6.
+postfix_inet_protocols: "all"
+
+# The local network interface addresses that this mail system receives mail on. Specify "all" to receive mail on all network interfaces (default),
+# "loopback-only" to receive mail on loopback network interfaces only (Postfix version 2.2 and later), or zero or more IPv4 or IPv6 addresses 
+# (IPv6 is supported in Postfix version 2.2 and later)
+postfix_inet_interfaces: "all"
+
+# The primary mail domain for this server.
+postfix_mail_domain: "{{ ansible_domain | default('internal.local') }}"
+
+# The Fully Qualified Domain Name of the mail server.
+postfix_myhostname: "mail.{{ postfix_mail_domain }}"
+
+# Comma-separated list of domains this server accepts mail for.
+# It's critical that this includes the server's own hostname and mail domain.
+postfix_mydestination: "$myhostname, localhost.{{ postfix_mail_domain }}, localhost, {{ postfix_mail_domain }}"
+
+# The relayhost (smarthost) for all outgoing mail.
+# This variable MUST be set for the role to work as intended.
+# Example: "[smtp.sendgrid.net]:587"
+# Note: The square brackets [] are important to prevent MX record lookups.
+postfix_relayhost: ""
+
+# Optional credentials for the relayhost. If these are defined,
+# SASL authentication will be automatically configured.
+# postfix_relayhost_user: "apikey"
+# postfix_relayhost_password: "YourVeryLongAndComplexApiKey"
