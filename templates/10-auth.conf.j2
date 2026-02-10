@@ -4,4 +4,5 @@
 disable_plaintext_auth = {{ 'yes' if dovecot_ssl == 'required' else 'no' }}
 auth_mechanisms = {{ dovecot_auth_mechanisms }}
 
+!include auth-dovecot-users.conf.ext
 !include auth-system.conf.ext

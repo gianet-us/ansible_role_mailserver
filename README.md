@@ -52,6 +52,20 @@ The role now supports installing and configuring Dovecot for IMAP/POP3 services.
 | dovecot_auth_mechanisms | "plain login" | Authentication mechanisms. |
 | dovecot_postfix_sasl_enable | true | Enable Postfix SASL authentication via Dovecot. |
 | dovecot_postfix_lmtp_enable | true | Enable Postfix delivery via Dovecot LMTP. |
+| dovecot_users | [] | List of local users to create. See below. |
+
+### **Local Dovecot Users**
+
+You can define local users for Dovecot (e.g., for service accounts). These users are managed in a separate password file and use a generated token for security.
+
+```yaml
+dovecot_users:
+  - name: "service1"
+    pass: "mysecretpassword"
+```
+
+The role will generate a random 16-character token on the server (stored in `/etc/dovecot/dovecot_token`). The actual password for the user will be `token + password`.
+For example, if the token is `He5rN5SPH33AbFLn` and the password is `mysecretpassword`, the service must authenticate with `He5rN5SPH33AbFLnmysecretpassword`.
 
 ### **SASL Authentication**
 

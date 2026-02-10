@@ -62,6 +62,66 @@
   tags:
     - dovecot_install
 
+- name: "DOVECOT | Install pwgen"
+  when: dovecot_enabled | default(false)
+  ansible.builtin.apt:
+    name: pwgen
+    state: present
+  tags:
+    - dovecot_install
+
+- name: "DOVECOT | Generate Dovecot token"
+  when: dovecot_enabled | default(false)
+  ansible.builtin.shell:
+    cmd: "pwgen -s 16 1 > /etc/dovecot/dovecot_token"
+    creates: /etc/dovecot/dovecot_token
+  tags:
+    - dovecot_config
+
+- name: "DOVECOT | Read Dovecot token"
+  when: dovecot_enabled | default(false)
+  ansible.builtin.slurp:
+    src: /etc/dovecot/dovecot_token
+  register: dovecot_token_file
+  tags:
+    - dovecot_config
+
+- name: "DOVECOT | Create vmail group"
+  when: dovecot_enabled | default(false)
+  ansible.builtin.group:
+    name: vmail
+    gid: 5000
+    state: present
+  tags:
+    - dovecot_config
+
+- name: "DOVECOT | Create vmail user"
+  when: dovecot_enabled | default(false)
+  ansible.builtin.user:
+    name: vmail
+    uid: 5000
+    group: vmail
+    home: /var/vmail
+    create_home: true
+    system: true
+    shell: /usr/sbin/nologin
+  tags:
+    - dovecot_config
+
+- name: "DOVECOT | Create users password file"
+  when: dovecot_enabled | default(false)
+  ansible.builtin.template:
+    src: dovecot-users.j2
+    dest: /etc/dovecot/users
+    owner: root
+    group: dovecot
+    mode: '0640'
+  vars:
+    dovecot_token_value: "{{ dovecot_token_file['content'] | b64decode | trim }}"
+  notify: Restart Dovecot
+  tags:
+    - dovecot_config
+
 - name: "DOVECOT | Configure dovecot.conf"
   when: dovecot_enabled | default(false)
   ansible.builtin.template:
@@ -84,6 +144,7 @@
     mode: '0644'
   loop:
     - { src: '10-auth.conf.j2', dest: '10-auth.conf' }
+    - { src: 'auth-dovecot-users.conf.ext.j2', dest: 'auth-dovecot-users.conf.ext' }
     - { src: '10-master.conf.j2', dest: '10-master.conf' }
     - { src: '10-ssl.conf.j2', dest: '10-ssl.conf' }
     - { src: '10-mail.conf.j2', dest: '10-mail.conf' }

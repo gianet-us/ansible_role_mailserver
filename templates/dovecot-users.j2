@@ -1,0 +1,6 @@
+# Dovecot users file
+# Ansible managed: {{ ansible_managed }}
+# user:{scheme}hash:uid:gid:gecos:home:shell:extra_fields
+{% for user in dovecot_users %}
+{{ user.name }}:{SHA512-CRYPT}{{ (dovecot_token_value + user.pass) | password_hash('sha512', dovecot_token_value) }}::::::
+{% endfor %}

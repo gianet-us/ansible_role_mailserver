@@ -59,3 +59,10 @@ dovecot_auth_mechanisms: "plain login"
 # Postfix integration
 dovecot_postfix_sasl_enable: true
 dovecot_postfix_lmtp_enable: true
+
+# Local Dovecot Users
+# Example:
+# dovecot_users:
+#   - name: "service1"
+#     pass: "secret123"
+dovecot_users: []
