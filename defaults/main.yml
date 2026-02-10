@@ -35,3 +35,27 @@ postfix_relayhost: ""
 # SASL authentication will be automatically configured.
 # postfix_relayhost_user: "apikey"
 # postfix_relayhost_password: "YourVeryLongAndComplexApiKey"
+
+# --- Dovecot Configuration ---
+
+# Whether to install and configure Dovecot
+dovecot_enabled: true
+
+# Protocols to enable (imap, pop3, lmtp)
+dovecot_protocols: "imap pop3 lmtp"
+
+# Mail storage location. Using Maildir in the user's home directory.
+dovecot_mail_location: "maildir:~/Maildir"
+
+# SSL/TLS configuration
+# Use 'yes', 'no' or 'required'. 'required' is recommended for production.
+dovecot_ssl: "yes"
+dovecot_ssl_cert: "</etc/ssl/certs/ssl-cert-snakeoil.pem"
+dovecot_ssl_key: "</etc/ssl/private/ssl-cert-snakeoil.key"
+
+# Authentication mechanisms
+dovecot_auth_mechanisms: "plain login"
+
+# Postfix integration
+dovecot_postfix_sasl_enable: true
+dovecot_postfix_lmtp_enable: true

@@ -1,0 +1,7 @@
+# Dovecot configuration file
+# Ansible managed: {{ ansible_managed }}
+
+protocols = {{ dovecot_protocols }}
+
+# Dictionary of configuration files
+!include conf.d/*.conf

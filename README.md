@@ -37,6 +37,22 @@ The role's behavior can be customized using the following variables. The default
 | postfix_inet_interfaces | all | The network interfaces Postfix listens on. Set to loopback-only to only accept mail from the server itself. |
 | postfix_inet_protocols | all | The IP protocols to use (ipv4, ipv6, or all). |
 
+### **Dovecot Configuration**
+
+The role now supports installing and configuring Dovecot for IMAP/POP3 services.
+
+| Variable | Default Value | Description |
+| :---- | :---- | :---- |
+| dovecot_enabled | true | Whether to install and configure Dovecot. |
+| dovecot_protocols | "imap pop3 lmtp" | Protocols to enable. |
+| dovecot_mail_location | "maildir:~/Maildir" | Mail storage location. |
+| dovecot_ssl | "yes" | SSL/TLS configuration (yes, no, required). |
+| dovecot_ssl_cert | snakeoil | Path to SSL certificate. |
+| dovecot_ssl_key | snakeoil | Path to SSL key. |
+| dovecot_auth_mechanisms | "plain login" | Authentication mechanisms. |
+| dovecot_postfix_sasl_enable | true | Enable Postfix SASL authentication via Dovecot. |
+| dovecot_postfix_lmtp_enable | true | Enable Postfix delivery via Dovecot LMTP. |
+
 ### **SASL Authentication**
 
 SASL authentication for the smarthost is **automatically enabled** if both postfix_relayhost_user and postfix_relayhost_password are defined. If they are not defined, Postfix will attempt to send mail without authentication.

@@ -53,3 +53,40 @@
   tags:
     - postfix_config
     - postfix_smarthost
+
+- name: "DOVECOT | Install Dovecot packages"
+  when: dovecot_enabled | default(false)
+  ansible.builtin.apt:
+    name: "{{ ['dovecot-core', 'dovecot-imapd', 'dovecot-pop3d'] + (['dovecot-lmtpd'] if dovecot_postfix_lmtp_enable | default(false) else []) }}"
+    state: present
+  tags:
+    - dovecot_install
+
+- name: "DOVECOT | Configure dovecot.conf"
+  when: dovecot_enabled | default(false)
+  ansible.builtin.template:
+    src: dovecot.conf.j2
+    dest: /etc/dovecot/dovecot.conf
+    owner: root
+    group: dovecot
+    mode: '0644'
+  notify: Restart Dovecot
+  tags:
+    - dovecot_config
+
+- name: "DOVECOT | Configure conf.d files"
+  when: dovecot_enabled | default(false)
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "/etc/dovecot/conf.d/{{ item.dest }}"
+    owner: root
+    group: dovecot
+    mode: '0644'
+  loop:
+    - { src: '10-auth.conf.j2', dest: '10-auth.conf' }
+    - { src: '10-master.conf.j2', dest: '10-master.conf' }
+    - { src: '10-ssl.conf.j2', dest: '10-ssl.conf' }
+    - { src: '10-mail.conf.j2', dest: '10-mail.conf' }
+  notify: Restart Dovecot
+  tags:
+    - dovecot_config

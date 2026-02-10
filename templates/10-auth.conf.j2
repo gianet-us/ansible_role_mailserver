@@ -1,0 +1,7 @@
+# Dovecot authentication configuration
+# Ansible managed: {{ ansible_managed }}
+
+disable_plaintext_auth = {{ 'yes' if dovecot_ssl == 'required' else 'no' }}
+auth_mechanisms = {{ dovecot_auth_mechanisms }}
+
+!include auth-system.conf.ext

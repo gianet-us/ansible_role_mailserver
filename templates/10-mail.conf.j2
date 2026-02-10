@@ -1,0 +1,7 @@
+# Dovecot mail location configuration
+# Ansible managed: {{ ansible_managed }}
+
+mail_location = {{ dovecot_mail_location }}
+namespace inbox {
+  inbox = yes
+}
