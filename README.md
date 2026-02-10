@@ -1,4 +1,4 @@
-# **Ansible Role: Postfix**
+# **Ansible Role: Mail**
 
 An Ansible role to install and configure Postfix on Debian-based systems.
 
