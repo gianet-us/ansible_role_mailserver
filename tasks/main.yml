@@ -57,7 +57,7 @@
 - name: "DOVECOT | Install Dovecot packages"
   when: dovecot_enabled | default(false)
   ansible.builtin.apt:
-    name: "{{ ['dovecot-core', 'dovecot-imapd', 'dovecot-pop3d'] + (['dovecot-lmtpd'] if dovecot_postfix_lmtp_enable | default(false) else []) }}"
+    name: "{{ ['dovecot-core', 'dovecot-imapd', 'dovecot-pop3d', 'openssl'] + (['dovecot-lmtpd'] if dovecot_postfix_lmtp_enable | default(false) else []) }}"
     state: present
   tags:
     - dovecot_install
@@ -105,6 +105,18 @@
     create_home: true
     system: true
     shell: /usr/sbin/nologin
+  tags:
+    - dovecot_config
+
+- name: "DOVECOT | Generate user password hashes"
+  when: dovecot_enabled | default(false) and dovecot_users | length > 0
+  ansible.builtin.command:
+    cmd: "openssl passwd -6 -salt {{ dovecot_token_value | quote }} {{ (dovecot_token_value + item.pass) | quote }}"
+  loop: "{{ dovecot_users }}"
+  register: dovecot_user_hashes
+  changed_when: false
+  vars:
+    dovecot_token_value: "{{ dovecot_token_file['content'] | b64decode | trim }}"
   tags:
     - dovecot_config
 
