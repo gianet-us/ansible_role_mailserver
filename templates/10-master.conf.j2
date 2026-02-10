@@ -38,7 +38,8 @@ service auth {
 
   unix_listener auth-userdb {
     mode = 0600
-    user = vmail
+    user = postfix
+    group = postfix
   }
 }
 
