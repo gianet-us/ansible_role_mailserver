@@ -108,6 +108,17 @@
   tags:
     - dovecot_config
 
+- name: "DOVECOT | Ensure vmail directory permissions"
+  when: dovecot_enabled | default(false)
+  ansible.builtin.file:
+    path: /var/vmail
+    state: directory
+    owner: vmail
+    group: vmail
+    mode: '0700'
+  tags:
+    - dovecot_config
+
 - name: "DOVECOT | Generate user password hashes"
   when: dovecot_enabled | default(false) and dovecot_users | length > 0
   ansible.builtin.command:
