@@ -58,8 +58,8 @@ dovecot_mail_location: "maildir:~/Maildir"
 # SSL/TLS configuration
 # Use 'yes', 'no' or 'required'. 'required' is recommended for production.
 dovecot_ssl: "yes"
-dovecot_ssl_cert: "</etc/ssl/certs/ssl-cert-snakeoil.pem"
-dovecot_ssl_key: "</etc/ssl/private/ssl-cert-snakeoil.key"
+mail_ssl_cert: "/etc/ssl/certs/ssl-cert-snakeoil.pem"
+mail_ssl_key: "/etc/ssl/private/ssl-cert-snakeoil.key"
 
 # Authentication mechanisms
 dovecot_auth_mechanisms: "plain login"

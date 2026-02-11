@@ -16,9 +16,8 @@ inet_interfaces = {{ postfix_inet_interfaces }}
 recipient_delimiter = +
 
 # TLS parameters for incoming connections
-# For a production server, replace snakeoil with real certificates.
-smtpd_tls_cert_file=/etc/ssl/certs/ssl-cert-snakeoil.pem
-smtpd_tls_key_file=/etc/ssl/private/ssl-cert-snakeoil.key
+smtpd_tls_cert_file={{ mail_ssl_cert }}
+smtpd_tls_key_file={{ mail_ssl_key }}
 smtpd_tls_security_level=may
 smtpd_use_tls=yes
 

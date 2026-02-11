@@ -2,5 +2,5 @@
 # Ansible managed: {{ ansible_managed }}
 
 ssl = {{ dovecot_ssl }}
-ssl_cert = {{ dovecot_ssl_cert }}
-ssl_key = {{ dovecot_ssl_key }}
+ssl_cert = <{{ mail_ssl_cert }}
+ssl_key = <{{ mail_ssl_key }}
