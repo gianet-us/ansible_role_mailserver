@@ -2,6 +2,12 @@
 # Ansible managed: {{ ansible_managed }}
 
 protocols = {{ dovecot_protocols }}
+{% if dovecot_imap_capability | default('') | length > 0 %}
+
+protocol imap {
+  imap_capability = {{ dovecot_imap_capability }}
+}
+{% endif %}
 
 # Dictionary of configuration files
 !include conf.d/*.conf
