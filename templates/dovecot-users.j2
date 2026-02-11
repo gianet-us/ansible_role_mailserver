@@ -1,0 +1,8 @@
+# Dovecot users file
+# Ansible managed: {{ ansible_managed }}
+# user:{scheme}hash:uid:gid:gecos:home:shell:extra_fields
+{% if dovecot_user_hashes.results is defined %}
+{% for res in dovecot_user_hashes.results %}
+{{ res.item.name }}:{SHA512-CRYPT}{{ res.stdout | trim }}::::::
+{% endfor %}
+{% endif %}

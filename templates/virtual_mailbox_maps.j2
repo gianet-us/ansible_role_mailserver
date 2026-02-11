@@ -1,0 +1,8 @@
+# Virtual mailbox maps for Postfix
+# Ansible managed: {{ ansible_managed }}
+# Format: user@domain   OK
+{% if dovecot_users is defined and dovecot_users | length > 0 %}
+{% for user in dovecot_users %}
+{{ user.name }}@{{ postfix_mail_domain }}   OK
+{% endfor %}
+{% endif %}

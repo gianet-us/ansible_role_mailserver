@@ -18,9 +18,10 @@ postfix_mail_domain: "{{ ansible_domain | default('internal.local') }}"
 # The Fully Qualified Domain Name of the mail server.
 postfix_myhostname: "mail.{{ postfix_mail_domain }}"
 
-# Comma-separated list of domains this server accepts mail for.
-# It's critical that this includes the server's own hostname and mail domain.
-postfix_mydestination: "$myhostname, localhost.{{ postfix_mail_domain }}, localhost, {{ postfix_mail_domain }}"
+# Comma-separated list of domains this server accepts mail for locally.
+# When using Dovecot with LMTP (virtual mailboxes), the mail domain is handled
+# separately via virtual_mailbox_domains, so it should NOT be included here.
+postfix_mydestination: "$myhostname, localhost.{{ postfix_mail_domain }}, localhost"
 
 # The list of "trusted" remote SMTP clients that have more privileges than "strangers".
 postfix_mynetworks: "127.0.0.0/8 [::1]/128"
@@ -35,3 +36,41 @@ postfix_relayhost: ""
 # SASL authentication will be automatically configured.
 # postfix_relayhost_user: "apikey"
 # postfix_relayhost_password: "YourVeryLongAndComplexApiKey"
+
+# --- Dovecot Configuration ---
+
+# Whether to install and configure Dovecot
+dovecot_enabled: true
+
+# Protocols to enable (imap, pop3, lmtp)
+dovecot_protocols: "imap pop3 lmtp"
+
+# IMAP capability adjustments. Set to modify advertised IMAP capabilities.
+# Use +CAPABILITY to add, -CAPABILITY to remove.
+# Example: "+IMAP4rev1 -LITERAL+ -NOTIFY" removes modern extensions that
+# might suppress standard untagged responses.
+# Leave empty to use Dovecot defaults.
+dovecot_imap_capability: ""
+
+# Mail storage location. Using Maildir in the user's home directory.
+dovecot_mail_location: "maildir:~/Maildir"
+
+# SSL/TLS configuration
+# Use 'yes', 'no' or 'required'. 'required' is recommended for production.
+dovecot_ssl: "yes"
+mail_ssl_cert: "/etc/ssl/certs/ssl-cert-snakeoil.pem"
+mail_ssl_key: "/etc/ssl/private/ssl-cert-snakeoil.key"
+
+# Authentication mechanisms
+dovecot_auth_mechanisms: "plain login"
+
+# Postfix integration
+dovecot_postfix_sasl_enable: true
+dovecot_postfix_lmtp_enable: true
+
+# Local Dovecot Users
+# Example:
+# dovecot_users:
+#   - name: "service1"
+#     pass: "secret123"
+dovecot_users: []

@@ -16,9 +16,8 @@ inet_interfaces = {{ postfix_inet_interfaces }}
 recipient_delimiter = +
 
 # TLS parameters for incoming connections
-# For a production server, replace snakeoil with real certificates.
-smtpd_tls_cert_file=/etc/ssl/certs/ssl-cert-snakeoil.pem
-smtpd_tls_key_file=/etc/ssl/private/ssl-cert-snakeoil.key
+smtpd_tls_cert_file={{ mail_ssl_cert }}
+smtpd_tls_key_file={{ mail_ssl_key }}
 smtpd_tls_security_level=may
 smtpd_use_tls=yes
 
@@ -48,3 +47,20 @@ smtp_tls_security_level = may
 # Other settings
 alias_maps = hash:/etc/aliases
 alias_database = hash:/etc/aliases
+
+# Dovecot Integration
+{% if dovecot_enabled | default(false) %}
+{% if dovecot_postfix_sasl_enable | default(false) %}
+# SASL Authentication via Dovecot
+smtpd_sasl_type = dovecot
+smtpd_sasl_path = private/auth
+smtpd_sasl_auth_enable = yes
+{% endif %}
+
+{% if dovecot_postfix_lmtp_enable | default(false) %}
+# Virtual mailbox configuration for Dovecot users
+virtual_mailbox_domains = {{ postfix_mail_domain }}
+virtual_mailbox_maps = hash:/etc/postfix/virtual_mailbox_maps
+virtual_transport = lmtp:unix:private/dovecot-lmtp
+{% endif %}
+{% endif %}

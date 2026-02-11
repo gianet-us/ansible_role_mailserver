@@ -1,72 +1,114 @@
-# **Ansible Role: Postfix**
+# Ansible Role: Mail
 
-An Ansible role to install and configure Postfix on Debian-based systems.
+An Ansible role to deploy and configure an internal mail server on Debian-based systems.
 
-## **Description**
+## Description
 
-This role sets up Postfix to function as a local mail server designed for internal use. Its primary function is to accept mail from local services and relay all outbound messages through a configured **smarthost**.
+This role sets up a complete internal mail server stack, currently including:
 
-This is the perfect setup for environments where internal applications (like cron, monitoring systems, or web applications) need to send email notifications without the complexity of managing a full, internet-facing mail server.
+- **Postfix** - Mail Transfer Agent (MTA) for sending and receiving mail
+- **Dovecot** - IMAP/POP3 server for mail retrieval
 
-This role performs the following actions:
+The role is designed for **internal use cases** where applications, services, and users within your infrastructure need to send and receive email. Outbound mail is relayed through a configured smarthost (e.g., SendGrid, Mailgun, or your ISP's SMTP server).
 
-* Installs the Postfix package and necessary SASL modules on Debian/Ubuntu.  
-* Manages the main Postfix configuration file (/etc/postfix/main.cf) via a template.  
-* Manages the /etc/mailname file for defining the mail domain.  
-* Configures Postfix to route all outgoing mail through a specified smarthost.  
-* Securely configures SASL authentication for the smarthost if credentials are provided.
+### Use Cases
 
-## **Requirements**
+- Internal applications sending notifications (cron jobs, monitoring, CI/CD pipelines)
+- Service accounts that need to receive and process email
+- Development and testing environments
+- Private mail infrastructure for small teams
 
-* **Target OS**: This role is designed exclusively for **Debian-based** distributions (e.g., Debian, Ubuntu).  
-* **Ansible**: Version 2.10 or newer.
+### What This Role Does NOT Include
 
-## **Role Variables**
+This role intentionally omits antispam and antivirus components. Since it's designed for internal mail that doesn't interact with external/untrusted sources, these features are unnecessary and would add complexity.
 
-The role's behavior can be customized using the following variables. The default values are defined in defaults/main.yml.
+## Requirements
 
-| Variable | Default Value | Description |
-| :---- | :---- | :---- |
-| postfix_relayhost | "" (empty string) | **Required.** The smarthost for relaying all mail. Use square brackets [] to prevent MX lookups (e.g., \[smtp.sendgrid.net\]:587). |
-| postfix_relayhost_user | (undefined) | The username for SASL authentication with the smarthost. If defined with a password, SASL auth will be enabled. |
-| postfix_relayhost_password | (undefined) | The password or API key for the smarthost user. **It** is strongly recommended to store this in Ansible **Vault.** |
-| postfix_mail_domain | `{{ ansible_domain \| default('internal.local') }}` | The primary mail domain for this server |
-| postfix_myhostname | `mail.{{ postfix_mail_domain }}` | The fully qualified domain name (FQDN) of the mail server itself (e.g., mail.example.com). |
-| postfix_mydestination | `$myhostname, localhost.{{ postfix_mail_domain }}, localhost, {{ postfix_mail_domain }}` | A comma-separated list of domains this server will accept mail for. The default is usually sufficient for an internal relay. |
-| postfix_mynetworks | `"127.0.0.0/8 [::1]/128"` | The list of "trusted" remote SMTP clients that have more privileges than "strangers"|
-| postfix_inet_interfaces | all | The network interfaces Postfix listens on. Set to loopback-only to only accept mail from the server itself. |
-| postfix_inet_protocols | all | The IP protocols to use (ipv4, ipv6, or all). |
+- **Target OS**: Debian-based distributions (Debian, Ubuntu)
+- **Ansible**: Version 2.10 or newer
 
-### **SASL Authentication**
+## Role Variables
 
-SASL authentication for the smarthost is **automatically enabled** if both postfix_relayhost_user and postfix_relayhost_password are defined. If they are not defined, Postfix will attempt to send mail without authentication.
+Default values are defined in `defaults/main.yml`.
 
-## **Dependencies**
+### General Settings
 
-This role has no dependencies on other Ansible roles or collections beyond the standard ansible.builtin modules.
+| Variable | Default | Description |
+| :--- | :--- | :--- |
+| mail_ssl_cert | snakeoil | Path to SSL certificate (shared by Postfix and Dovecot). |
+| mail_ssl_key | snakeoil | Path to SSL private key (shared by Postfix and Dovecot). |
 
-## **Example Playbook**
+### Postfix Configuration
 
-Here is a basic example of how to use this role in your playbook. You must define postfix_relayhost. It is also highly recommended to use Ansible Vault to encrypt the smarthost password.
+| Variable | Default | Description |
+| :--- | :--- | :--- |
+| postfix_relayhost | "" | **Required.** Smarthost for relaying outbound mail. Use brackets to skip MX lookups (e.g., `[smtp.sendgrid.net]:587`). |
+| postfix_relayhost_user | (undefined) | Username for smarthost SASL authentication. |
+| postfix_relayhost_password | (undefined) | Password/API key for smarthost. Store in Ansible Vault. |
+| postfix_mail_domain | `{{ ansible_domain }}` | Primary mail domain for this server. |
+| postfix_myhostname | `mail.{{ postfix_mail_domain }}` | FQDN of the mail server. |
+| postfix_mydestination | `$myhostname, localhost...` | Domains accepted for local delivery. |
+| postfix_mynetworks | `127.0.0.0/8 [::1]/128` | Trusted networks allowed to relay. |
+| postfix_inet_interfaces | all | Network interfaces to listen on. Use `loopback-only` for local-only access. |
+| postfix_inet_protocols | all | IP protocols to use (ipv4, ipv6, or all). |
 
+SASL authentication for the smarthost is automatically enabled when both `postfix_relayhost_user` and `postfix_relayhost_password` are defined.
+
+### Dovecot Configuration
+
+| Variable | Default | Description |
+| :--- | :--- | :--- |
+| dovecot_enabled | true | Install and configure Dovecot. |
+| dovecot_protocols | "imap pop3 lmtp" | Protocols to enable. |
+| dovecot_mail_location | "maildir:~/Maildir" | Mail storage format and location. |
+| dovecot_ssl | "yes" | SSL/TLS mode: `yes`, `no`, or `required`. |
+| dovecot_auth_mechanisms | "plain login" | Allowed authentication mechanisms. |
+| dovecot_postfix_sasl_enable | true | Allow Postfix to authenticate users via Dovecot. |
+| dovecot_postfix_lmtp_enable | true | Deliver mail to Dovecot via LMTP. |
+| dovecot_imap_capability | "" | Adjust advertised IMAP capabilities (e.g., `+IMAP4rev1 -LITERAL+`). |
+| dovecot_users | [] | List of virtual mailbox users. See below. |
+
+### Virtual Mailbox Users
+
+Define users for Dovecot virtual mailboxes:
+
+```yaml
+dovecot_users:
+  - name: "service1"
+    pass: "mysecretpassword"
 ```
----  
-- hosts: all  
-  become: true  
-  roles:  
-    - role: your_username.postfix
-      vars:  
-        postfix_relayhost: "[smtp.mailgun.org\]:587"  
-        postfix_relayhost_user: "postmaster@mg.example.com"  
-        postfix_relayhost_password: "{{ vaulted_mailgun_password }}" # Stored in Ansible Vault  
-        postfix_inet_interfaces: "loopback-only"  
+
+For security, the role generates a random 16-character token on the server (stored in `/etc/dovecot/dovecot_token`). The actual password is `token + password`. For example, if the token is `He5rN5SPH33AbFLn`, the user must authenticate with `He5rN5SPH33AbFLnmysecretpassword`.
+
+## Dependencies
+
+None.
+
+## Example Playbook
+
+```yaml
+---
+- hosts: mail_servers
+  become: true
+  roles:
+    - role: giacchetta.mail
+      vars:
         postfix_mail_domain: "example.com"
+        postfix_relayhost: "[smtp.mailgun.org]:587"
+        postfix_relayhost_user: "postmaster@mg.example.com"
+        postfix_relayhost_password: "{{ vault_mailgun_password }}"
+        mail_ssl_cert: "/etc/letsencrypt/live/mail.example.com/fullchain.pem"
+        mail_ssl_key: "/etc/letsencrypt/live/mail.example.com/privkey.pem"
+        dovecot_ssl: "required"
+        dovecot_users:
+          - name: "alerts"
+            pass: "{{ vault_alerts_password }}"
 ```
 
-## **License**
+## License
 
 GPL-3.0-only
 
-## **Author Information**
+## Author Information
 
 This role was created by Giacchetta Networks.
