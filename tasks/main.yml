@@ -54,6 +54,29 @@
     - postfix_config
     - postfix_smarthost
 
+- name: "POSTFIX | Configure virtual mailbox maps"
+  when: dovecot_enabled | default(false) and dovecot_postfix_lmtp_enable | default(false)
+  ansible.builtin.template:
+    src: virtual_mailbox_maps.j2
+    dest: /etc/postfix/virtual_mailbox_maps
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Restart Postfix
+  tags:
+    - postfix_config
+    - dovecot_config
+
+- name: "POSTFIX | Create hash map for virtual mailbox maps"
+  when: dovecot_enabled | default(false) and dovecot_postfix_lmtp_enable | default(false)
+  ansible.builtin.command:
+    cmd: postmap hash:/etc/postfix/virtual_mailbox_maps
+  changed_when: true
+  notify: Restart Postfix
+  tags:
+    - postfix_config
+    - dovecot_config
+
 - name: "DOVECOT | Install Dovecot packages"
   when: dovecot_enabled | default(false)
   ansible.builtin.apt:

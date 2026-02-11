@@ -18,9 +18,10 @@ postfix_mail_domain: "{{ ansible_domain | default('internal.local') }}"
 # The Fully Qualified Domain Name of the mail server.
 postfix_myhostname: "mail.{{ postfix_mail_domain }}"
 
-# Comma-separated list of domains this server accepts mail for.
-# It's critical that this includes the server's own hostname and mail domain.
-postfix_mydestination: "$myhostname, localhost.{{ postfix_mail_domain }}, localhost, {{ postfix_mail_domain }}"
+# Comma-separated list of domains this server accepts mail for locally.
+# When using Dovecot with LMTP (virtual mailboxes), the mail domain is handled
+# separately via virtual_mailbox_domains, so it should NOT be included here.
+postfix_mydestination: "$myhostname, localhost.{{ postfix_mail_domain }}, localhost"
 
 # The list of "trusted" remote SMTP clients that have more privileges than "strangers".
 postfix_mynetworks: "127.0.0.0/8 [::1]/128"
