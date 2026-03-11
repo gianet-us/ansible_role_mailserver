@@ -1,0 +1,64 @@
+#SPDX-License-Identifier: GPL-3.0-only
+---
+dependency:
+  name: galaxy
+  options:
+    requirements-file: molecule/default/requirements.yml
+
+driver:
+  name: podman
+
+platforms:
+  - name: debian-stable
+    image: docker.io/library/debian:stable
+    pre_build_image: false
+    dockerfile: Dockerfile
+    privileged: true
+    systemd: always
+    command: /usr/sbin/init
+
+  - name: debian-oldstable
+    image: docker.io/library/debian:oldstable
+    pre_build_image: false
+    dockerfile: Dockerfile
+    privileged: true
+    systemd: always
+    command: /usr/sbin/init
+
+  - name: ubuntu-latest
+    image: docker.io/library/ubuntu:latest
+    pre_build_image: false
+    dockerfile: Dockerfile
+    privileged: true
+    systemd: always
+    command: /usr/sbin/init
+
+  - name: ubuntu-jammy
+    image: docker.io/library/ubuntu:jammy
+    pre_build_image: false
+    dockerfile: Dockerfile
+    privileged: true
+    systemd: always
+    command: /usr/sbin/init
+
+provisioner:
+  name: ansible
+  env:
+    ANSIBLE_ROLES_PATH: "${MOLECULE_PROJECT_DIRECTORY}/.."
+  playbooks:
+    converge: converge.yml
+    verify: verify.yml
+
+scenario:
+  test_sequence:
+    - dependency
+    - destroy
+    - syntax
+    - create
+    - converge
+    - idempotence
+    - verify
+    - destroy
+
+verifier:
+  name: ansible
