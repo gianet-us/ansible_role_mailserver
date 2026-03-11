@@ -1,5 +1,21 @@
 # Dovecot local users authentication
 # Ansible managed: {{ ansible_managed }}
+{% if dovecot_major_version is defined and dovecot_major_version is version('2.4', '>=') %}
+
+passdb passwd-file {
+  default_password_scheme = SHA512-CRYPT
+  auth_username_format = %{user|username}
+  passwd_file_path = /etc/dovecot/users
+}
+
+userdb static {
+  fields {
+    uid = vmail
+    gid = vmail
+    home = /var/vmail/%{user|username}
+  }
+}
+{% else %}
 
 passdb {
   driver = passwd-file
@@ -10,3 +26,4 @@ userdb {
   driver = static
   args = uid=vmail gid=vmail home=/var/vmail/%n
 }
+{% endif %}

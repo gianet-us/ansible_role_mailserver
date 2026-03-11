@@ -2,5 +2,10 @@
 ---
 - name: Converge
   hosts: all
+  vars:
+    postfix_mail_domain: "test.local"
+    dovecot_users:
+      - name: "testuser"
+        pass: "testpass"
   roles:
     - role: ansible_role_mail

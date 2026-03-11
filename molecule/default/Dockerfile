@@ -1,4 +1,5 @@
-FROM docker.io/library/debian:stable
+ARG MOLECULE_DISTRO=docker.io/library/debian:stable
+FROM ${MOLECULE_DISTRO}
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \

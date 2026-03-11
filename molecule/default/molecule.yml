@@ -13,6 +13,8 @@ platforms:
     image: docker.io/library/debian:stable
     pre_build_image: false
     dockerfile: Dockerfile
+    buildargs:
+      MOLECULE_DISTRO: docker.io/library/debian:stable
     privileged: true
     systemd: always
     command: /usr/sbin/init
@@ -21,6 +23,8 @@ platforms:
     image: docker.io/library/debian:oldstable
     pre_build_image: false
     dockerfile: Dockerfile
+    buildargs:
+      MOLECULE_DISTRO: docker.io/library/debian:oldstable
     privileged: true
     systemd: always
     command: /usr/sbin/init
@@ -29,6 +33,8 @@ platforms:
     image: docker.io/library/ubuntu:latest
     pre_build_image: false
     dockerfile: Dockerfile
+    buildargs:
+      MOLECULE_DISTRO: docker.io/library/ubuntu:latest
     privileged: true
     systemd: always
     command: /usr/sbin/init
@@ -37,6 +43,8 @@ platforms:
     image: docker.io/library/ubuntu:jammy
     pre_build_image: false
     dockerfile: Dockerfile
+    buildargs:
+      MOLECULE_DISTRO: docker.io/library/ubuntu:jammy
     privileged: true
     systemd: always
     command: /usr/sbin/init
