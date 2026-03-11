@@ -1,7 +1,13 @@
 # Dovecot mail location configuration
 # Ansible managed: {{ ansible_managed }}
-
+{% if dovecot_major_version is defined and dovecot_major_version is version('2.4', '>=') %}
+{% set _driver = dovecot_mail_location.split(':')[0] %}
+{% set _path = dovecot_mail_location.split(':')[1] %}
+mail_driver = {{ _driver }}
+mail_path = {{ _path }}
+{% else %}
 mail_location = {{ dovecot_mail_location }}
+{% endif %}
 namespace inbox {
   inbox = yes
 

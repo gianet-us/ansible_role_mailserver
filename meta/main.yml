@@ -1,5 +1,6 @@
 galaxy_info:
   role_name: "mailserver"
+  namespace: "gianet"
   author: "Luciano Giacchetta"
   description: "Complete Mail Server Role"
   company: "Giacchetta Networks LLC"

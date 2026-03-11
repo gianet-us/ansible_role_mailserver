@@ -1,0 +1,37 @@
+#SPDX-License-Identifier: GPL-3.0-only
+---
+- name: Verify
+  hosts: all
+  tasks:
+    - name: Gather service facts
+      ansible.builtin.service_facts:
+
+    - name: Assert postfix service is present
+      ansible.builtin.assert:
+        that:
+          - "'postfix.service' in ansible_facts.services"
+
+    - name: Assert dovecot service is present
+      ansible.builtin.assert:
+        that:
+          - "'dovecot.service' in ansible_facts.services"
+
+    - name: Check postfix main.cf exists
+      ansible.builtin.stat:
+        path: /etc/postfix/main.cf
+      register: postfix_main_cf
+
+    - name: Assert postfix main.cf exists
+      ansible.builtin.assert:
+        that:
+          - postfix_main_cf.stat.exists
+
+    - name: Check dovecot.conf exists
+      ansible.builtin.stat:
+        path: /etc/dovecot/dovecot.conf
+      register: dovecot_conf
+
+    - name: Assert dovecot.conf exists
+      ansible.builtin.assert:
+        that:
+          - dovecot_conf.stat.exists

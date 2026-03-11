@@ -62,13 +62,16 @@
     owner: root
     group: root
     mode: '0644'
+  register: virtual_mailbox_maps_template
   notify: Restart Postfix
   tags:
     - postfix_config
     - dovecot_config
 
 - name: "POSTFIX | Create hash map for virtual mailbox maps"
-  when: dovecot_enabled | default(false) and dovecot_postfix_lmtp_enable | default(false)
+  when:
+    - dovecot_enabled | default(false) and dovecot_postfix_lmtp_enable | default(false)
+    - virtual_mailbox_maps_template.changed
   ansible.builtin.command:
     cmd: postmap hash:/etc/postfix/virtual_mailbox_maps
   changed_when: true
@@ -165,6 +168,22 @@
   vars:
     dovecot_token_value: "{{ dovecot_token_file['content'] | b64decode | trim }}"
   notify: Restart Dovecot
+  tags:
+    - dovecot_config
+
+- name: "DOVECOT | Detect Dovecot version"
+  when: dovecot_enabled | default(false)
+  ansible.builtin.shell:
+    cmd: "dovecot --version | awk '{print $1}' | cut -d'(' -f1"
+  register: dovecot_version_raw
+  changed_when: false
+  tags:
+    - dovecot_config
+
+- name: "DOVECOT | Set Dovecot major version fact"
+  when: dovecot_enabled | default(false)
+  ansible.builtin.set_fact:
+    dovecot_major_version: "{{ dovecot_version_raw.stdout.split('.')[0] | int }}.{{ dovecot_version_raw.stdout.split('.')[1] | int }}"
   tags:
     - dovecot_config
 

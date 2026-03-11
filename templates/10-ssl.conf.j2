@@ -2,5 +2,10 @@
 # Ansible managed: {{ ansible_managed }}
 
 ssl = {{ dovecot_ssl }}
+{% if dovecot_major_version is defined and dovecot_major_version is version('2.4', '>=') %}
+ssl_server_cert_file = {{ mail_ssl_cert }}
+ssl_server_key_file = {{ mail_ssl_key }}
+{% else %}
 ssl_cert = <{{ mail_ssl_cert }}
 ssl_key = <{{ mail_ssl_key }}
+{% endif %}
