@@ -41,3 +41,22 @@ jobs:
           git remote set-url origin "https://giabot:${{ secrets.GITEA_TOKEN }}@gianet.us/engineering/ansible_role_mail.git"
           git tag -f latest
           git push -f origin latest
+
+      # This step will ONLY run if any of the previous steps failed
+      - name: Notify on Failure
+        if: failure()
+        # if: always()
+        uses: dawidd6/action-send-mail@v17
+        with:
+          server_address: mail.gianet.us
+          server_port: 2525
+          ignore_cert: true
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: Scheduled workflow "${{ gitea.workflow }}" has failed
+          to: infrastructure+actions@gianet.us
+          from: "Gitea Actions <${{ secrets.MAIL_USERNAME }}>"
+          body: |
+            The job was automatically triggered by a ${{ gitea.event_name }} event
+            View the run here: ${{ gitea.server_url }}/${{ gitea.repository }}/actions/runs/${{ gitea.run_number }}
+            
